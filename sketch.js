@@ -5,12 +5,17 @@ let mainarr;
 let layerarr;
 let boxlen=(w/2.5)/blocks
 let sx=w/3.33,sy=80;
-let flagcount=36;
+let flagcount=36,tflag=flagcount;
 var d = new Date();
 let inittime=d.getTime();
 let seconds= 0;
 let mousecount=0;
 let visited;
+let gameon=true
+let ending_wait;
+let gamewin=0;
+
+
 
 function make2DArray(cols, rows,value) {
     let arr = new Array(cols);
@@ -63,7 +68,7 @@ function draw(){
 
     for (let i = 0; i < blocks; i++) {
         for(let j=0;j<blocks;j++){
-            if(layerarr[i][j]){
+            if((layerarr[i][j]) && (gameon)){
                 if((i+j)%2==0){fill(col,200,255)}
                 else{fill(col,200,125)}
                 rect(sx+(i*boxlen),sy+(j*boxlen),boxlen,boxlen)
@@ -89,17 +94,52 @@ function draw(){
         }
       }
       if(((mouseX>=sx) && (mouseX<=sx+(boxlen*16))) && ((mouseY>=sy) && (mouseY<=sy+(boxlen*16)))){
-        let point=getgrid(mouseX,mouseY)
-        if(layerarr[point[0]][point[1]]!=0){
-          fill(col,100,255)
-          rect(sx+(point[0]*boxlen),sy+(point[1]*boxlen),boxlen,boxlen)
-          if(layerarr[point[0]][point[1]]==2){
-            textSize(25);
-            text('🚩', sx+(point[0]*boxlen)+5,sy+(point[1]*boxlen)+boxlen-8);
+        if(gameon){
+          let point=getgrid(mouseX,mouseY)
+          if(layerarr[point[0]][point[1]]!=0){
+            fill(col,100,255)
+            rect(sx+(point[0]*boxlen),sy+(point[1]*boxlen),boxlen,boxlen)
+            if(layerarr[point[0]][point[1]]==2){
+              textSize(25);
+              text('🚩', sx+(point[0]*boxlen)+5,sy+(point[1]*boxlen)+boxlen-8);
+            }
           }
         }
       }
       print(mousecount)
+      if(!gameon){
+        
+          swal("Sorry!" , "You lost\nbetter luck next time" , 
+          "error").then((value) => {
+            if(value){
+              location.reload();
+            }else if(value==null){
+              location.reload();
+            }
+          });
+          noLoop();
+        
+      }
+      if(flagcount==0){
+        for (let i = 0; i < blocks; i++) {
+          for(let j=0;j<blocks;j++){
+              if((mainarr[i][j]==100) && (layerarr[i][j]==2)){
+                gamewin++;
+              }
+          }
+        }
+        if(gamewin==tflag){
+          swal("Sorry!" , "You won\ncongratulations" , 
+          "success").then((value) => {
+            if(value){
+              location.reload();
+            }else if(value==null){
+              location.reload();
+            }
+          });
+          noLoop();
+        }
+      }
 
 }
 
@@ -115,14 +155,9 @@ function mousePressed() {
     //print(layerarr[point[0]][point[1]])
     if(layerarr[point[0]][point[1]]!=2){
       if(mainarr[point[0]][point[1]]==100){
-        swal("Sorry!" , "You lost\nbetter luck next time" , 
-        "error").then((value) => {
-          if(value){
-            location.reload();
-          }else if(value==null){
-            location.reload();
-          }
-        });
+          gameon=false
+          ending_wait=seconds
+        
 
         return;
       }else{
